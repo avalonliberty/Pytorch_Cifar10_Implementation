@@ -61,11 +61,9 @@ class BottleNeck(nn.Module):
     
     expansion = 4
     
-    def __init__(self, input_channels, output_channels,
-                 stride, inner_width = 64, groups = 64):
+    def __init__(self, input_channels, output_channels, stride, groups = 1):
         super(BottleNeck, self).__init__()
-        if inner_width < 64:
-            raise ValueError('The width can not be smaller than 64')
+        inner_width = int(output_channels / self.expansion)
         self.reduce = BasicConv(input_channels, inner_width, kernel_size = 1)
         self.conv = BasicConv(inner_width, inner_width, kernel_size = 3,
                               stride = stride, groups = groups, padding = 1)
@@ -136,3 +134,7 @@ def ResNet34():
 def ResNet50():
     
     return ResNet(BottleNeck, [3, 4, 6, 3])
+
+def ResNet101():
+    
+    return ResNet(BottleNeck, [3, 4, 24, 3])
