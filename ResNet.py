@@ -89,6 +89,14 @@ class BottleNeck(nn.Module):
         x = self.relu(x)
         return x
     
+class flatten(nn.Module):
+    
+    def __init__(self):
+        super(flatten, self).__init__()
+        
+    def forward(self, x):
+        return torch.flatten(x, 1)
+    
 class ResNet(nn.Module):
     
     def __init__(self, block, layers):
@@ -100,6 +108,7 @@ class ResNet(nn.Module):
         self.layer3 = self._create_layers(block, layers[2], 256, 2)
         self.layer4 = self._create_layers(block, layers[3], 512, 2)
         self.avg = nn.AdaptiveAvgPool2d((1, 1))
+        self.flatten = flatten()
         self.fc = nn.Linear(512, 10)
         
     def _create_layers(self, block, layer, output_channels, stride):
@@ -119,7 +128,7 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.avg(x)
-        x = torch.flatten(x, 1)
+        x = self.flatten(x)
         x = self.fc(x)
         return x
     
