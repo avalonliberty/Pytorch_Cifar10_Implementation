@@ -101,7 +101,8 @@ class ResNet(nn.Module):
     
     def __init__(self, block, layers):
         super(ResNet, self).__init__()
-        self.input_channels = 64
+        self.origin_input = 64
+        self.input_channels = self.origin_input
         self.preconv = BasicConv(3, 64, kernel_size = 3, stride = 1, padding = 1)
         self.layer1 = self._create_layers(block, layers[0], 64, 1)
         self.layer2 = self._create_layers(block, layers[1], 128, 2)
