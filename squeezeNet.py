@@ -5,6 +5,8 @@ SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model si
 
 import torch.nn as nn
 import torch
+import torch.nn.init as init
+from collections import OrderedDict
 
 class squeeze_block(nn.Module):
     
@@ -69,11 +71,21 @@ class squeezeNet(nn.Module):
                 fire(512, 48, 256, 256)
                 )
         self.post_layer = nn.Sequential(
-                nn.Dropout(p = 0.5),
-                nn.Conv2d(512, num_classes, kernel_size = 1),
-                nn.ReLU(inplace = True),
-                nn.AdaptiveAvgPool2d((1, 1))
+                OrderedDict([
+                        ('dropout', nn.Dropout(p = 0.5)),
+                        ('last_conv', nn.Conv2d(512, num_classes, kernel_size = 1)),
+                        ('relu', nn.ReLU(inplace = True)),
+                        ('avgpool', nn.AdaptiveAvgPool2d((1, 1)))
+                        ])
                 )
+    
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                if name == 'post_layer.last_conv':
+                    init.normal_(module.weight, mean = 0, std = 0.01)
+                else:
+                    init.kaiming_normal_(module.weight)
+                init.constant_(module.bias, 0)
         
     def forward(self, x):
         #type : (Tensor)
