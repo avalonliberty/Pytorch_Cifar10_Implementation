@@ -129,4 +129,5 @@ class mobileNet(nn.Module):
         x = self.dropout(x)
         # N x 1024
         x = self.fc(x)
+        # N x 10
         return x
