@@ -113,3 +113,19 @@ class denseNet(nn.Module):
         x = self.classifier(x)
         
         return x
+    
+def denseNet121():
+    
+    return denseNet([6, 12, 24, 16])
+
+def denseNet161():
+    
+    return denseNet([6, 12, 36, 24], input_channel = 96, growth_rate = 48)
+
+def denseNet169():
+    
+    return denseNet([6, 12, 32, 32])
+
+def denseNet201():
+    
+    return denseNet([6, 12, 48, 32])
