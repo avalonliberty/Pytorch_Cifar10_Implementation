@@ -157,6 +157,73 @@ class InceptionD(nn.Module):
         
         return torch.cat([branch1, branch2, branch3], dim = 1)
     
+class InceptionA_Res(nn.Module):
+    
+    def __init__(self, input_channel, scale = 0.1):
+        #Type : (int, int)
+        super(InceptionA_Res, self).__init__()
+        self.scale = scale
+        self.branch1 = Basic_Conv(input_channel, 32, kernel_size = 1)
+        
+        self.branch2_1x1 = Basic_Conv(input_channel, 32, kernel_size = 1)
+        self.branch2_3x3 = Basic_Conv(32, 32, kernel_size = 3, padding = 1)
+        
+        self.branch3_1x1 = Basic_Conv(input_channel, 32, kernel_size = 1)
+        self.branch3_3x3_1 = Basic_Conv(32, 48, kernel_size = 3, padding = 1)
+        self.branch3_3x3_2 = Basic_Conv(48, 64, kernel_size = 3, padding = 1)
+        
+        self.expand = nn.Conv2d(128, 256, kernel_size = 1, bias = False)
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        #Type : (Tensor)
+        branch1 = self.branch1(x)
+        
+        branch2 = self.branch2_1x1(x)
+        branch2 = self.branch2_3x3(branch2)
+        
+        branch3 = self.branch3_1x1(x)
+        branch3 = self.branch3_3x3_1(branch3)
+        branch3 = self.branch3_3x3_2(branch3)
+        
+        features = torch.cat([branch1, branch2, branch3], dim = 1)
+        features = self.expand(features)
+        
+        output = x + features * self.scale
+        output = self.relu(output)
+        
+        return output
+    
+class InceptionB_Res(nn.Module):
+    
+    def __init__(self, input_channel, scale = 0.1):
+        #Type : (int, int)
+        super(InceptionB_Res, self).__init__()
+        self.scale = scale
+        self.branch1 = Basic_Conv(input_channel, 128, kernel_size = 1)
+        
+        self.branch2_1x1 = Basic_Conv(input_channel, 128, kernel_size = 1)
+        self.branch2_1x7 = Basic_Conv(128, 128, kernel_size = (1, 7), padding = (1, 3))
+        self.branch2_7x1 = Basic_Conv(128, 128, kernel_size = (7, 1), padding = (3, 1))
+        
+        self.expand = nn.Conv2d(256, 896, kernel_size = 1, bias = False)
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        #Type : (Tensor)
+        branch1 = self.branch1(x)
+        
+        branch2 = self.branch2_1x1(x)
+        branch2 = self.branch2_1x7(branch2)
+        branch2 = self.branch2_7x1(branch2)
+        
+        features = torch.cat([branch1, branch2], dim = 1)
+        output = self.expand(features)
+        output = x + output * self.scale
+        output = self.relue(output)
+        
+        return output
+    
 class Inception_AUX(nn.Module):
     
     def __init__(self):
